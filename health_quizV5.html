@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>健康系統檢測評估</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F6F1;--ink:#1C2620;--ink-soft:#56625A;--line:#D7DCD2;
+  --teal:#0F5C57;--teal-dim:#E3ECE9;--card:#FFFFFF;
+  --c1:#0F5C57;--c1-dim:#E1ECEA;
+  --c2:#7A5C2E;--c2-dim:#EFE7D8;
+  --c3:#5B5184;--c3-dim:#E7E4F0;
+  --c4:#B0492E;--c4-dim:#F4E2DC;
+  --c5:#2E5F8A;--c5-dim:#DEE8F0;
+  --c6:#3D7A4A;--c6-dim:#E1EFE4;
+  --low:#2D6A31;--low-dim:#EAF4EB;--low-line:#A5D6A7;
+  --mid:#7B5800;--mid-dim:#FFF8E1;--mid-line:#FFD54F;
+  --high:#B71C1C;--high-dim:#FFEBEE;--high-line:#EF9A9A;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;min-height:100vh;line-height:1.5;}
+.wrap{max-width:760px;margin:0 auto;padding:48px 24px 80px;}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.eyebrow::before{content:"";width:18px;height:1px;background:var(--ink-soft);}
+h1{font-family:'Fraunces',serif;font-weight:600;font-size:36px;line-height:1.15;letter-spacing:-0.01em;}
+h2{font-family:'Fraunces',serif;font-weight:600;font-size:24px;}
+p.lead{color:var(--ink-soft);font-size:15px;margin-top:12px;max-width:56ch;}
+.topbar{display:flex;justify-content:space-between;align-items:center;max-width:760px;margin:0 auto;padding:20px 24px 0;}
+.brand{font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.08em;color:var(--ink-soft);}
+.admin-link{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);cursor:pointer;background:none;border:none;border-bottom:1px dotted var(--ink-soft);}
+.intro-card{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:36px;margin-top:32px;}
+.field{margin-top:18px;}
+.field label{font-size:12px;color:var(--ink-soft);display:block;margin-bottom:6px;font-family:'IBM Plex Mono',monospace;letter-spacing:.04em;}
+.field input,.field textarea{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:3px;font-family:'Inter',sans-serif;font-size:15px;background:#fff;color:var(--ink);}
+.field input:focus,.field textarea:focus{outline:2px solid var(--teal);outline-offset:1px;}
+.field textarea{resize:vertical;min-height:90px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+@media(max-width:560px){.field-row{grid-template-columns:1fr;}}
+.gender-row{display:flex;gap:12px;margin-top:8px;}
+.gender-btn{flex:1;padding:14px 12px;border:1.5px solid var(--line);border-radius:4px;background:#fff;cursor:pointer;font-family:'Inter',sans-serif;font-size:15px;color:var(--ink-soft);text-align:center;transition:all .15s;}
+.gender-btn:hover{border-color:var(--teal);color:var(--teal);}
+.gender-btn.selected{border-color:var(--teal);background:var(--teal-dim);color:var(--teal);font-weight:600;}
+.gender-btn .gi{font-size:24px;display:block;margin-bottom:4px;}
+button.primary{margin-top:28px;background:var(--teal);color:#fff;border:none;padding:14px 26px;font-size:15px;font-weight:600;border-radius:3px;cursor:pointer;font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:8px;}
+button.primary:hover{background:#0c4944;}
+button.primary:disabled{background:#A9B3AC;cursor:not-allowed;}
+button.secondary{margin-top:16px;background:transparent;color:var(--ink);border:1px solid var(--line);padding:12px 22px;font-size:14px;border-radius:3px;cursor:pointer;font-family:'Inter',sans-serif;}
+.progress-row{display:flex;align-items:center;gap:14px;margin:36px 0 28px;}
+.progress-track{flex:1;height:4px;background:var(--line);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--teal);transition:width .35s ease;}
+.progress-label{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);white-space:nowrap;}
+.section-card{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:32px;}
+.cat-badge{display:inline-flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;padding:5px 12px;border-radius:20px;margin-bottom:10px;}
+.cat-dot{width:7px;height:7px;border-radius:50%;}
+.quiz-hint{font-size:13px;color:var(--ink-soft);margin-bottom:18px;padding:8px 12px;background:var(--paper);border-radius:3px;border-left:3px solid var(--line);}
+.q-item{display:flex;align-items:flex-start;gap:14px;padding:14px 4px;border-bottom:1px solid var(--line);cursor:pointer;}
+.q-item:last-child{border-bottom:none;}
+.q-item:hover .q-checkbox{border-color:var(--teal);}
+@media(max-width:600px){.q-item{padding:18px 6px;}.q-checkbox{width:24px;height:24px;}.q-text{font-size:15.5px;padding-top:2px;}}
+.time-badge{display:inline-flex;align-items:center;gap:6px;background:var(--teal-dim);color:var(--teal);font-family:'IBM Plex Mono',monospace;font-size:12px;padding:5px 12px;border-radius:20px;margin-top:14px;}
+.q-checkbox{width:20px;height:20px;border:1.5px solid var(--ink-soft);border-radius:3px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.q-checkbox.checked{background:var(--teal);border-color:var(--teal);}
+.q-checkbox svg{display:none;width:13px;height:13px;}
+.q-checkbox.checked svg{display:block;}
+.q-text{font-size:15px;color:var(--ink);padding-top:1px;}
+.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:28px;}
+/* Score overview grid */
+.score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:28px 0;}
+@media(max-width:600px){.score-grid{grid-template-columns:repeat(2,1fr);}}
+.score-cell{border-radius:4px;padding:14px 10px;text-align:center;border:1px solid var(--line);background:var(--card);}
+.score-cell .snum{font-family:'Fraunces',serif;font-size:26px;font-weight:600;}
+.score-cell .sname{font-size:11.5px;color:var(--ink-soft);margin-top:3px;line-height:1.3;}
+/* Result cards */
+.result-card{border:1px solid var(--line);border-radius:12px;margin-bottom:16px;background:var(--card);overflow:hidden;}
+.result-card.tier-low{opacity:.82;}
+.rc-head{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid rgba(0,0,0,.07);}
+.rc-head-left{display:flex;align-items:center;gap:12px;}
+.rc-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;color:#fff;}
+.rc-name{font-family:'Fraunces',serif;font-size:17px;font-weight:600;line-height:1.2;}
+.rc-score{font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:3px;}
+.tier-badge{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap;}
+.rc-body{padding:18px 20px;}
+.rc-desc{font-size:14px;line-height:1.75;color:var(--ink);margin-bottom:16px;}
+.rc-section-label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px;}
+.test-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
+.test-pill{font-size:12px;padding:4px 11px;border-radius:20px;border:1px solid var(--teal);background:var(--teal-dim);color:var(--teal);}
+.tip-cards{display:grid;gap:8px;}
+.tip-card{display:flex;gap:12px;align-items:flex-start;padding:10px 13px;background:var(--paper);border-radius:8px;border:1px solid var(--line);}
+.tip-icon{font-size:18px;flex-shrink:0;margin-top:2px;}
+.tip-title{font-size:13px;font-weight:600;color:var(--ink);line-height:1.3;}
+.tip-desc{font-size:12.5px;color:var(--ink-soft);margin-top:3px;line-height:1.6;}
+.summary-banner{background:var(--ink);color:#fff;border-radius:4px;padding:26px 28px;margin:28px 0;}
+.summary-banner .eyebrow{color:#B8C2BA;}
+.summary-banner .eyebrow::before{background:#B8C2BA;}
+.summary-banner p{font-size:14.5px;color:#DCE3DD;line-height:1.7;margin-top:8px;}
+footer.note{margin-top:36px;font-size:12.5px;color:var(--ink-soft);line-height:1.7;border-top:1px solid var(--line);padding-top:18px;}
+
+.contact-card{background:var(--teal-dim);border:1px solid var(--teal);border-radius:4px;padding:26px 28px;margin-top:26px;}
+.contact-card p{font-size:14.5px;color:var(--ink);line-height:1.7;margin-top:6px;}
+.contact-actions{margin-top:14px;}
+.line-btn{display:inline-flex;align-items:center;gap:8px;background:#06C755;color:#fff;padding:13px 22px;border-radius:3px;font-size:14.5px;font-weight:600;text-decoration:none;}
+.line-btn:hover{background:#059944;}
+.admin-gate{max-width:420px;margin:80px auto;background:var(--card);border:1px solid var(--line);border-radius:4px;padding:32px;}
+table.admin-table{width:100%;border-collapse:collapse;margin-top:20px;font-size:13px;}
+table.admin-table th,table.admin-table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;}
+table.admin-table th{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.05em;}
+.pill{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;padding:2px 8px;border-radius:10px;margin:2px 3px 2px 0;}
+.empty-state{text-align:center;padding:60px 20px;color:var(--ink-soft);}
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:10px;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">健康系統檢測評估 ／ LAB-SCREEN</div>
+  <button class="admin-link" id="adminToggle">後台管理</button>
+</div>
+<div class="wrap" id="hq-quiz-root"></div>
+<script>
+const ALL_CATEGORIES = {
+  hormone_male:{
+    key:"hormone_male",name:"賀爾蒙（男性）",color:"c1",
+    test:"完整男性賀爾蒙檢測",
+    items:["運動後修復變慢","性慾下降","情緒容易低落或易怒","肌肉量難以提升","體力變差","容易長痘痘","性功能下降（勃起次數、硬度）"],
+    rec:{
+      low:"賀爾蒙狀態良好，維持規律運動、充足睡眠與均衡飲食，建議每年進行基礎健康檢查。",
+      mid:"賀爾蒙可能有輕度波動，建議從以下幾個生活面向著手調整，有助改善整體狀況。",
+      high:"賀爾蒙失衡風險較高，建議安排以下相關檢測，深入了解現況，及早介入調整。",
+      tips:["確保充足睡眠：建議每天睡眠7–9小時，良好的睡眠品質有助於維持正常荷爾蒙分泌。","學會管理壓力：長期壓力可能影響身體內分泌平衡，可透過運動、冥想、深呼吸或培養興趣來調適壓力。","均衡飲食：確保攝取足夠的碳水化合物、蛋白質、健康脂肪及鋅、鎂、維生素D等關鍵營養素，避免長期高糖、高油及過度加工食品。"],
+      midTips:["確保充足睡眠：每日維持7–8小時睡眠，有助維持正常荷爾蒙分泌。","均衡飲食：增加原型食物比例，確保攝取足夠的碳水化合物、蛋白質、健康脂肪與蔬菜等。","學會管理壓力：慢性壓力會干擾內分泌平衡，可嘗試冥想、運動或培養放鬆習慣。"]
+    }
+  },
+  hormone_female:{
+    key:"hormone_female",name:"賀爾蒙（女性）",color:"c1",
+    test:"完整女性賀爾蒙檢測、雌激素代謝評估（尿液）",
+    items:["月經週期不規律（時間變短、長）","經期不適感強烈（疼痛、痠痛、頭痛等）","經前、中情緒波動大（易怒、焦慮）","經前或經期睡眠品質不佳","經期前後會長痘痘／粉刺","曾被診斷多囊性卵巢","經期需要靠止痛藥緩解"],
+    rec:{
+      low:"賀爾蒙狀態良好，維持規律運動、充足睡眠與均衡飲食，建議每年進行基礎健康檢查。",
+      mid:"賀爾蒙可能有輕度波動，建議從以下幾個生活面向著手調整，有助改善整體狀況。",
+      high:"賀爾蒙失衡風險較高，建議安排以下相關檢測全面評估，擬定個人化調整方針。",
+      tips:["確保充足睡眠：建議每天睡眠7–9小時，良好的睡眠品質有助於維持正常荷爾蒙分泌。","學會管理壓力：長期壓力可能影響身體內分泌平衡，可透過運動、冥想、深呼吸或培養興趣來調適壓力。","均衡飲食：以天然原型食物為主，均衡攝取優質蛋白質、健康脂肪、全穀雜糧、蔬果及乳製品，並依個人需求適度補充鐵、葉酸、鈣、鎂及維生素D等營養素。"],
+      midTips:["確保充足睡眠：每日維持7–8小時睡眠，有助穩定荷爾蒙分泌節律。","均衡飲食：增加原型食物比例，確保攝取足夠的碳水化合物、蛋白質、健康脂肪與蔬菜等。","學會管理壓力：慢性壓力會干擾內分泌平衡，可嘗試冥想、深呼吸或培養放鬆習慣。"]
+    }
+  },
+  gut:{
+    key:"gut",name:"消化道",color:"c2",
+    test:"完整腸胃消化功能評估（消化、腸漏症、麩質敏感）（糞便）、急性過敏原40項＋慢性過敏原檢測88項",
+    items:["經常脹氣","容易便秘／腹瀉","吃到特定食物容易腸胃不適","排便容易有食物殘渣","排便容易黏馬桶","容易餓也容易飽","經常胃食道逆流"],
+    rec:{
+      low:"消化道健康狀況良好，保持均衡飲食、作息與補充益生菌，有助維持腸道健康。",
+      mid:"消化道可能有輕度不適，建議從以下幾個方向調整，並觀察身體反應。",
+      high:"消化道功能可能有明顯異常，建議安排以下相關檢測找出根本原因，對症調整。",
+      tips:["調整飲食內容：增加蔬菜、水果、全穀類及多樣化植物性食物攝取，補充膳食纖維，維持良好的腸道環境。","維持水分攝取：每日飲水量建議體重（kg）× 30-40 mL，搭配充足膳食纖維，有助於維持正常排便習慣。","建立良好飲食習慣：避免長期高油、高糖及過度加工食品，維持規律三餐與細嚼慢嚥，減少消化負擔。","維持規律活動：適度運動有助於維持腸道正常蠕動與整體健康。"],
+      midTips:["增加膳食纖維：每餐蔬果攝取至少1拳頭以上，有助維持消化道健康。","補充足夠水分：每日飲水量建議體重（kg）× 30-40 mL，有助改善排便狀況。","補充益生菌：可嘗試補充益生菌或多攝取優格、味噌等發酵食品，觀察腸道反應。"]
+    }
+  },
+  stress:{
+    key:"stress",name:"壓力／睡眠",color:"c3",
+    test:"壓力荷爾蒙節律與覺醒反應分析（唾液）、神經傳導代謝物評估（尿液）、完整甲狀腺檢測",
+    items:["容易焦慮緊張","生活忙碌緊湊","不容易入睡","嘗試過睡眠相關保健品卻沒有改善","常覺得沒精神、無力","睡眠品質差超過3個月（淺眠、多夢、易早醒）","睡很久仍覺得累"],
+    rec:{
+      low:"壓力管理與睡眠品質良好，維持現有生活節奏，適度運動與曬太陽有助身心平衡。",
+      mid:"有輕度壓力或睡眠困擾，建議從以下幾個方向調整作息與放鬆習慣。",
+      high:"壓力與睡眠問題明顯，建議安排以下相關檢測全面評估，擬定個人化調整方針。",
+      tips:["建立規律睡眠習慣：維持固定的睡眠時間與起床時間，避免長期熬夜或睡眠時間不足。","提升睡眠品質：睡前減少使用3C產品、避免過度刺激活動，營造適合休息的睡眠環境。","適當調節壓力：學習辨識壓力來源，透過深呼吸、冥想、伸展、休閒活動或興趣培養等方式，找到適合自己的放鬆方法。","調整影響睡眠的生活習慣：避免中午後攝取過量咖啡因、酒精或過度刺激性飲食，減少影響睡眠品質的因素。"],
+      midTips:["建立固定睡眠時間：維持一致的入睡與起床時間，有助調節生理時鐘。","睡前減少使用3C：睡前1小時避免使用手機或螢幕，有助提升睡眠品質。","嘗試冥想或深呼吸：每天10分鐘的靜心練習，有助降低皮質醇、緩解焦慮。"]
+    }
+  },
+  thyroid:{
+    key:"thyroid",name:"甲狀腺",color:"c4",
+    test:"完整甲狀腺檢測",
+    items:["長期低碳／低脂飲食","減重超過半年沒效果","家族或本人有甲狀腺病史","掉髮增加","月經週期不規律","容易疲倦","日常壓力大、容易內耗"],
+    rec:{
+      low:"甲狀腺功能正常風險低，維持均衡飲食（含足夠碘質與硒），避免長期極端飲食控制。",
+      mid:"有部分甲狀腺相關風險因子，建議從以下幾個方向調整飲食與生活習慣。",
+      high:"甲狀腺功能異常風險較高，建議安排以下相關檢測評估目前功能現況，避免問題持續惡化。",
+      tips:["均衡攝取多元營養：維持均衡飲食，攝取足夠蛋白質、蔬菜、水果及全穀類，避免長期偏食或過度限制飲食。","避免長期極端飲食控制：過度節食、熱量攝取不足或營養不均，可能影響身體代謝調節，建議採取均衡且可長期維持的飲食方式。","維持良好睡眠與壓力管理：長期壓力與睡眠不足可能影響身體調節能力，建議建立規律作息。","維持健康體重：透過均衡飲食與規律活動維持適當體態，避免體重快速變化。"],
+      midTips:["避免長期極端節食：過度限制熱量或營養，可能影響甲狀腺素的正常合成。","留意身體變化：定期留意體重、疲勞感、掉髮等變化，若有明顯異常建議及早尋求專業評估。","維持規律作息：避免長期熬夜與慢性壓力，有助維持甲狀腺功能的穩定。"]
+    }
+  },
+  chronic:{
+    key:"chronic",name:"慢性疾病",color:"c5",
+    test:"心血管代謝疾病評估（血液）、脂蛋白代謝評估（血液）",
+    items:["過去曾有血壓、血脂、血糖等數據異常","家族有高血壓、高血糖、高血脂、心肌梗塞或中風病史","體重或腰圍逐漸增加","腹部肥胖","久坐族群","經常飲酒或抽菸","常吃炸物或喝含糖飲料"],
+    rec:{
+      low:"慢性疾病風險較低，維持健康體重、規律運動是最佳預防策略，建議每年安排一次身體健康檢查。",
+      mid:"有部分生活習慣風險因子，建議從以下幾個方向逐步調整，降低慢性疾病風險。",
+      high:"慢性代謝疾病風險明顯，建議安排以下相關檢測，全面了解心血管代謝健康狀況。",
+      tips:["均衡飲食，調整飲食型態：維持多元化飲食，增加蔬菜、水果、全穀類及優質蛋白質攝取，減少高糖、高油、高鹽及過度加工食品。","建立規律運動習慣：建議每週安排固定運動時間，結合有氧運動與阻力訓練，維持肌肉量與整體健康。","增加膳食纖維攝取：多選擇蔬菜、水果、豆類及全穀雜糧，有助於維持消化道健康。","避免不良生活習慣：減少吸菸、過量飲酒及長時間久坐等習慣。"],
+      midTips:["調整飲食型態：減少高油、高糖、高鹽食品，增加蔬果、全穀類與優質蛋白質攝取。","增加規律運動：每週至少3次、每次30分鐘的有氧運動，有助改善代謝指標。","定期監測血壓腰圍：養成自我監測習慣，及早發現數值異常並調整生活習慣。"]
+    }
+  },
+  diet:{
+    key:"diet",name:"飲食攝取狀況",color:"c6",
+    test:"抗氧化維生素分析、營養與毒性元素分析（礦物質、微量元素、重金屬）、營養元素分析（礦物質、微量元素）、細胞營養代謝評估（尿液）",
+    items:["外食居多或執行特殊飲食法（素食、生酮等）","海鮮一周小於2次","吃某些保健品覺得沒效果（B群、鎂、益生菌等）","一週內經常選擇相同或相似的餐點","時常感冒、免疫力低下","日常時常抽筋","長期每日蔬菜量低於1拳頭"],
+    rec:{
+      low:"飲食多樣性及營養攝取良好，繼續維持均衡飲食習慣。",
+      mid:"飲食結構有待改善，建議從以下幾個方向逐步優化，補足可能的營養缺口。",
+      high:"營養缺乏或失衡風險較高，建議安排以下相關檢測找出具體缺口，擬定個人化補充方向。",
+      tips:["建立均衡飲食習慣：維持三餐規律，均衡攝取六大類食物，避免長期偏食、過度限制或單一飲食模式。","攝取足夠優質蛋白質：每餐適量補充魚、肉、蛋、豆製品及乳製品，幫助維持肌肉量與身體正常生理機能。","增加全穀雜糧與膳食纖維攝取：適度以未精製全穀類取代部分精緻澱粉，增加蔬菜、水果、豆類等食物比例。","補充健康脂肪來源：適量攝取堅果、種子、橄欖油及深海魚類等優質脂肪來源，避免過度低脂飲食。"],
+      midTips:["增加食物多樣性：每週嘗試2種新食材，避免長期單一飲食造成營養缺口。","記錄每日飲食：用手機拍照或App記錄三餐，有助找出飲食盲點並逐步調整。","選擇適合的烹飪方式：優先選擇少油烹調，避免重口味加工食品。"]
+    }
+  }
+};
+
+const THRESHOLD=4;
+const APPS_SCRIPT_URL="https://script.google.com/macros/s/AKfycbx4UXU6qNxWXrjAMMlOfhHJCjgFc9LTGf5-3b9yDmKnrqdfR6Hvmz8feQqNls4vWnc/exec";
+const ADMIN_PASSWORD="mypoint9023";
+
+function getCats(gender){
+  const hKey=gender==="male"?"hormone_male":"hormone_female";
+  return [hKey,"gut","stress","thyroid","chronic","diet"].map(k=>ALL_CATEGORIES[k]);
+}
+
+let state={view:"intro",name:"",lineId:"",email:"",gender:"",note:"",contactTime:"",consent:false,saveFailed:false,step:0,answers:{},submissionId:null};
+
+function isValidEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);}
+function canProceed(){
+  const hasLine=state.lineId.trim().length>0;
+  const emailVal=state.email.trim();
+  const hasValidEmail=emailVal.length>0&&isValidEmail(emailVal);
+  return hasLine||hasValidEmail;
+}
+function chk(){return '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.2 11.5L13 4.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';}
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+
+function render(){
+  const app=document.getElementById('hq-quiz-root');
+  if(state.view==="intro") app.innerHTML=renderIntro();
+  else if(state.view==="quiz") app.innerHTML=renderQuiz();
+  else if(state.view==="extra") app.innerHTML=renderExtra();
+  else if(state.view==="result") app.innerHTML=renderResult();
+  else if(state.view==="admin-gate") app.innerHTML=renderAdminGate();
+  else if(state.view==="admin") app.innerHTML=renderAdmin();
+  attachHandlers();
+}
+
+function renderIntro(){
+  return `
+    <div class="eyebrow">健康風險自我評估</div>
+    <h1>找出您最該優先安排的<br>檢測項目</h1>
+    <p class="lead">共 6 大系統、42 道題目，依生活習慣與身體感受勾選符合的描述，完成後依分數為您標出建議優先檢測的方向。</p>
+    <div class="time-badge">🕐 約需 3–5 分鐘完成</div>
+    <div class="intro-card">
+      <div class="field">
+        <label>姓名 ／ 暱稱 <span style="color:#B0492E;">*</span></label>
+        <input type="text" id="nameInput" placeholder="請輸入您的姓名" value="${esc(state.name)}">
+      </div>
+      <div class="field">
+        <label>LINE ID</label>
+        <input type="text" id="lineInput" placeholder="請輸入 LINE ID" value="${esc(state.lineId)}">
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:14px;">
+        <div style="flex:1;height:1px;background:var(--line);"></div>
+        <span style="font-size:13px;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;">或</span>
+        <div style="flex:1;height:1px;background:var(--line);"></div>
+      </div>
+      <div class="field" style="margin-top:14px;">
+        <label>電子信箱</label>
+        <input type="text" id="emailInput" placeholder="請輸入電子信箱" value="${esc(state.email)}">
+      </div>
+      <div class="field">
+        <label>您的生理性別</label>
+        <div class="gender-row">
+          <button class="gender-btn ${state.gender==='female'?'selected':''}" data-gender="female"><span class="gi">♀</span>女性</button>
+          <button class="gender-btn ${state.gender==='male'?'selected':''}" data-gender="male"><span class="gi">♂</span>男性</button>
+        </div>
+      </div>
+      <button class="primary" id="startBtn" ${(!state.gender||!state.name.trim()||!canProceed())?'disabled':''}>開始填寫 →</button>
+      <p id="startHint" style="margin-top:10px;font-size:13px;color:#B0492E;">
+        ${!state.gender?'請先選擇性別以繼續':(!state.name.trim()?'請輸入姓名以繼續':((!canProceed())?(state.email.trim()&&!isValidEmail(state.email)?'電子信箱格式不正確，請重新確認':'請填寫 LINE ID 或正確格式的電子信箱（擇一）'):''))}
+      </p>
+    </div>
+    <footer class="note">本問卷僅作為健康風險初步篩檢參考，不能取代醫師專業診斷。填答結果將被記錄，以利後續追蹤與檢測安排。</footer>
+  `;
+}
+
+function renderQuiz(){
+  const cats=getCats(state.gender);
+  const cat=cats[state.step];
+  const total=cats.length;
+  const pct=Math.round((state.step/total)*100);
+  const checked=cat.items.filter((_,i)=>state.answers[cat.key+":"+i]).length;
+  return `
+    <div class="progress-row">
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="progress-label">${state.step+1} / ${total}</div>
+    </div>
+    <div class="section-card">
+      <span class="cat-badge" style="background:var(--${cat.color}-dim);color:var(--${cat.color})">
+        <span class="cat-dot" style="background:var(--${cat.color})"></span>${cat.name}
+      </span>
+      <h2>請勾選符合您目前狀況的描述</h2>
+      <div class="quiz-hint">✦ 可複選｜若沒有合適選項，可直接跳過此頁</div>
+      <div>
+        ${cat.items.map((text,i)=>{
+          const isChecked=!!state.answers[cat.key+":"+i];
+          return `<div class="q-item" data-cat="${cat.key}" data-idx="${i}">
+            <div class="q-checkbox ${isChecked?'checked':''}">${chk()}</div>
+            <div class="q-text">${text}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="nav-row">
+        <button class="secondary" id="prevBtn" style="${state.step===0?'visibility:hidden':''}">← 上一頁</button>
+        <div class="progress-label" style="font-size:13px;color:var(--ink-soft)">已勾選 ${checked} 題</div>
+        <button class="primary" id="nextBtn">${state.step===total-1?'下一步 →':'下一頁 →'}</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderExtra(){
+  return `
+    <div class="progress-row">
+      <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+      <div class="progress-label">補充說明</div>
+    </div>
+    <div class="section-card">
+      <h2>還有其他想補充的嗎？</h2>
+      <p style="color:var(--ink-soft);font-size:14.5px;margin-top:10px;line-height:1.7;">若您有其他身體不適或特殊狀況，未包含在以上題目中，歡迎在下方補充說明，或直接透過官方 LINE 告知我們。</p>
+      <div class="field" style="margin-top:14px;">
+        <label>其他補充（選填）</label>
+        <textarea id="noteInput" placeholder="例如：近期有特殊狀況、懷孕、目前服用藥物名稱或類別等…">${esc(state.note)}</textarea>
+      </div>
+      <div style="margin-top:20px;padding:16px 18px;background:var(--teal-dim);border:1px solid var(--teal);border-radius:8px;">
+        <div style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;" id="consentRow">
+          <div style="width:20px;height:20px;border:1.5px solid ${state.consent?'var(--teal)':'var(--ink-soft)'};border-radius:3px;flex-shrink:0;margin-top:1px;background:${state.consent?'var(--teal)':'transparent'};display:flex;align-items:center;justify-content:center;">
+            ${state.consent?'<svg viewBox="0 0 16 16" fill="none" width="13" height="13"><path d="M3 8.5L6.2 11.5L13 4.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
+          </div>
+          <p style="font-size:13.5px;color:var(--teal);line-height:1.65;margin:0;">我同意由專業團隊根據我的評估結果，透過 LINE ID 或電子信箱主動與我聯繫，協助安排後續檢測諮詢。</p>
+        </div>
+        <div class="field" style="margin-top:14px;">
+          <label style="color:var(--teal);">方便聯繫時間（選填）</label>
+          <input type="text" id="contactTimeInput" placeholder="例如：平日下午 2–5 點" value="${esc(state.contactTime)}">
+        </div>
+      </div>
+      <div style="text-align:center;padding:8px 0;margin-top:24px;">
+        <a class="line-btn" href="https://lin.ee/nckt8Qs" target="_blank" rel="noopener" style="display:inline-flex;border-radius:8px;padding:13px 28px;font-size:14.5px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.02 2 11c0 3.04 1.65 5.72 4.15 7.4-.18.64-.66 2.35-.76 2.72-.12.45.17.44.36.32.15-.1 2.36-1.56 3.32-2.19.6.08 1.22.13 1.85.13 5.52 0 10-4.02 10-9s-4.48-9-10-9z"/></svg>
+          加入官方 LINE
+        </a>
+      </div>
+      <div class="nav-row" style="margin-top:24px;">
+        <button class="secondary" id="prevBtn">← 上一頁</button>
+        <button class="primary" id="submitBtn">查看結果 →</button>
+      </div>
+    </div>
+  `;
+}
+
+const CAT_ICONS={hormone_male:"♂",hormone_female:"♀",gut:"🫁",stress:"🧠",thyroid:"⚡",chronic:"❤️",diet:"🥗"};
+const CAT_ICON_CSS={hormone_male:"#0F5C57",hormone_female:"#0F5C57",gut:"#7A5C2E",stress:"#5B5184",thyroid:"#B0492E",chronic:"#2E5F8A",diet:"#3D7A4A"};
+
+function getTier(score){
+  if(score<=1) return "low";
+  if(score<=3) return "mid";
+  return "high";
+}
+function tierLabel(t){
+  if(t==="low") return {text:"🟢 低風險",headBg:"var(--low-dim)",headColor:"var(--low)",badgeBg:"var(--low)",badgeColor:"#fff"};
+  if(t==="mid") return {text:"🟡 中度注意",headBg:"var(--mid-dim)",headColor:"var(--mid)",badgeBg:"var(--mid)",badgeColor:"#fff"};
+  return {text:"🔴 建議安排檢測",headBg:"var(--high-dim)",headColor:"var(--high)",badgeBg:"var(--high)",badgeColor:"#fff"};
+}
+
+function splitTip(tip){
+  const idx=tip.indexOf("：");
+  if(idx===-1) return {title:tip,desc:""};
+  return {title:tip.slice(0,idx),desc:tip.slice(idx+1)};
+}
+
+const TIP_ICONS={
+  "確保充足睡眠":"🌙","學會管理壓力":"🧘","均衡飲食":"🥦",
+  "調整飲食內容":"🥦","維持水分攝取":"💧","建立良好飲食習慣":"📅","維持規律活動":"🏃",
+  "建立規律睡眠習慣":"🌙","提升睡眠品質":"😴","適當調節壓力":"🧘","調整影響睡眠的生活習慣":"☕",
+  "均衡攝取多元營養":"🥗","避免長期極端飲食控制":"⚖️","維持良好睡眠與壓力管理":"🧘","維持健康體重":"🎯",
+  "均衡飲食，調整飲食型態":"🥗","建立規律運動習慣":"🏃","增加膳食纖維攝取":"🥦","避免不良生活習慣":"🚫",
+  "建立均衡飲食習慣":"📅","攝取足夠優質蛋白質":"🥩","增加全穀雜糧與膳食纖維攝取":"🌾","補充健康脂肪來源":"🥑",
+  "增加膳食纖維":"🥦","補充足夠水分":"💧","補充益生菌":"🦠",
+  "建立固定睡眠時間":"🌙","睡前減少使用3C":"📵","嘗試冥想或深呼吸":"🧘",
+  "避免長期極端節食":"⚖️","確保碘與硒的攝取":"🐟","維持充足且均衡的營養攝取":"🥗","留意身體變化":"📋","維持規律作息":"📅",
+  "調整飲食型態":"🥗","增加規律運動":"🏃","定期監測血壓腰圍":"📊",
+  "增加食物多樣性":"🌈","記錄每日飲食":"📝","減少外食或選擇更健康的外食":"🍱","選擇適合的烹飪方式":"🍳",
+};
+function downloadPDF(){
+  const scores=computeScores();
+  const tierLabel_={low:'🟢 低風險',mid:'🟡 中度注意',high:'🔴 建議安排檢測'};
+  const tierColor={low:'#265528',mid:'#7B5800',high:'#B71C1C'};
+  const tierBg={low:'#EAF4EB',mid:'#FFF8E1',high:'#FFEBEE'};
+
+  let cardsHtml=scores.map(s=>{
+    const tl=tierLabel_[s.tier];
+    const tc=tierColor[s.tier];
+    const tb=tierBg[s.tier];
+    const rec=s.rec;
+    const msg=s.tier==='low'?rec.low:s.tier==='mid'?rec.mid:rec.high;
+    const tests=s.tier==='high'?splitTests(s.test):[];
+    const activeTips=s.tier==='high'?(rec.tips||[]):s.tier==='mid'?(rec.midTips||[]):[];
+    return `<div style="border:1px solid #ddd;border-radius:10px;margin-bottom:14px;overflow:hidden;page-break-inside:avoid;">
+      <div style="background:${tb};padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(0,0,0,.08);">
+        <div>
+          <div style="font-size:15px;font-weight:600;color:${tc};font-family:serif;">${s.name}</div>
+          <div style="font-size:11px;color:${tc};opacity:.75;margin-top:2px;">勾選 ${s.score} / ${s.items.length} 題</div>
+        </div>
+        <span style="background:${tc};color:#fff;font-size:11px;padding:4px 10px;border-radius:20px;">${tl}</span>
+      </div>
+      <div style="padding:14px 16px;">
+        <p style="font-size:13.5px;line-height:1.75;color:#1C2620;margin:0 0 10px;">${msg}</p>
+        ${tests.length?`<div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:6px;">建議檢測項目</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;">${tests.map(t=>`<span style="background:#E3ECE9;color:#0F5C57;font-size:11.5px;padding:3px 9px;border-radius:20px;border:1px solid #0F5C57;">${t}</span>`).join('')}</div>`:''}
+        ${activeTips.length?`<div style="border-top:1px solid #eee;padding-top:10px;margin-top:6px;">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:8px;">${s.tier==='high'?'生活調整建議':'生活提醒'}</div>
+          ${activeTips.map(tip=>{const{title,desc}=splitTip(tip);return`<div style="display:flex;gap:8px;padding:7px 10px;background:#f8f8f6;border-radius:6px;margin-bottom:5px;"><div><div style="font-size:12.5px;font-weight:600;color:#1C2620;">${title}</div>${desc?`<div style="font-size:12px;color:#56625A;margin-top:2px;line-height:1.55;">${desc}</div>`:''}</div></div>`;}).join('')}
+          ${s.tier==='mid'?`<div style="margin-top:8px;padding:9px 12px;background:#FFF8E1;border-radius:6px;border:1px solid #FFD54F;font-size:12px;color:#6D4C00;line-height:1.6;">💡 <strong>小提醒：</strong>若調整半年後仍未見改善，建議預約專業營養服務。</div>`:''}
+        </div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  const highCats=scores.filter(s=>s.tier==='high');
+  const summaryText=highCats.length>0
+    ?`依您的勾選結果，<strong>${highCats.map(s=>s.name).join('、')}</strong> 等 ${highCats.length} 個系統達建議安排檢測門檻（勾選 4 題以上）。`
+    :`目前各系統勾選題數皆未達建議門檻，整體生活型態風險偏低。`;
+
+  const html=`<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8">
+  <title>健康評估結果 — ${state.name||'填答者'}</title>
+  <style>
+    body{font-family:'PingFang TC','Microsoft JhengHei',sans-serif;background:#F4F6F1;color:#1C2620;margin:0;padding:0;}
+    .page{max-width:700px;margin:0 auto;padding:32px 24px 60px;}
+    h1{font-size:24px;font-weight:700;margin:0 0 4px;}
+    @media print{
+      body{background:#fff;}
+      .no-print{display:none!important;}
+      .page{padding:16px;}
+    }
+  </style>
+  </head><body>
+  <div class="page">
+    <div class="no-print" style="background:#0F5C57;color:#fff;padding:12px 16px;border-radius:8px;margin-bottom:20px;font-size:13.5px;line-height:1.6;">
+      📄 請使用瀏覽器的「<strong>列印</strong>」功能（Ctrl+P 或 ⌘+P），選擇「<strong>另存為 PDF</strong>」即可儲存。
+    </div>
+    <div style="margin-bottom:24px;">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#56625A;margin-bottom:8px;">健康系統檢測評估 — 個人結果</div>
+      <h1>${state.name||'填答者'}的健康評估結果</h1>
+      <div style="font-size:12.5px;color:#56625A;margin-top:6px;">填答時間：${new Date().toLocaleString('zh-TW')}</div>
+    </div>
+    <div style="background:#1C2620;color:#fff;border-radius:8px;padding:20px 22px;margin-bottom:20px;">
+      <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#B8C2BA;margin-bottom:8px;">整體建議</div>
+      <p style="font-size:14px;color:#DCE3DD;line-height:1.7;margin:0;">${summaryText}</p>
+    </div>
+    ${cardsHtml}
+    <div style="margin-top:28px;padding-top:16px;border-top:1px solid #D7DCD2;font-size:11.5px;color:#56625A;line-height:1.7;">
+      本結果為初步生活型態風險篩檢，僅供參考。實際是否需要檢測請與醫師或專業醫事人員進一步討論。
+    </div>
+  </div>
+  </body></html>`;
+
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='健康評估結果_'+(state.name||'填答者')+'.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+function splitTests(str){
+  const parts=[];let cur="",depth=0;
+  for(const ch of str){
+    if(ch==="（"||ch==="(") depth++;
+    else if(ch==="）"||ch===")") depth--;
+    if(ch==="、"&&depth===0){parts.push(cur.trim());cur="";}
+    else cur+=ch;
+  }
+  if(cur.trim()) parts.push(cur.trim());
+  return parts;
+}
+
+function getTipIcon(title){return TIP_ICONS[title]||"✦";}
+
+function computeScores(){
+  return getCats(state.gender).map(c=>{
+    const score=c.items.filter((_,i)=>state.answers[c.key+":"+i]).length;
+    return {...c,score,tier:getTier(score)};
+  });
+}
+
+function renderResult(){
+  const scores=computeScores();
+  const highCats=scores.filter(s=>s.tier==="high");
+  return `
+    <div id="resultContent">
+    <div class="eyebrow">評估結果</div>
+    <h1>${esc(state.name)||'您的'}健康系統檢測結果</h1>
+
+    <div class="score-grid">
+      ${scores.map(s=>{
+        const tl=tierLabel(s.tier);
+        const pct=Math.round((s.score/s.items.length)*100);
+        const barColor=s.tier==='high'?'var(--high)':s.tier==='mid'?'#E6A817':'var(--low)';
+        return `<div class="score-cell" style="background:${tl.headBg};border-color:rgba(0,0,0,.06);padding:14px 16px;text-align:left;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
+            <div class="sname" style="font-size:12px;color:${tl.headColor};font-weight:600;">${s.name}</div>
+            <div class="snum" style="font-size:20px;color:${tl.headColor};">${s.score}<span style="font-size:11px;opacity:.6;font-family:'IBM Plex Mono',monospace;">/${s.items.length}</span></div>
+          </div>
+          <div style="height:6px;background:rgba(0,0,0,.08);border-radius:3px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:${barColor};border-radius:3px;transition:width .6s ease;"></div>
+          </div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:${tl.headColor};opacity:.75;margin-top:6px;">${tl.text}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="summary-banner">
+      <div class="eyebrow">整體建議</div>
+      <p>${highCats.length>0
+        ?`依您的勾選結果，<strong style="color:#fff">${highCats.map(s=>s.name).join('、')}</strong> 等 ${highCats.length} 個系統達建議安排檢測門檻（勾選 4 題以上），建議優先評估。`
+        :`目前各系統勾選題數皆未達建議門檻，整體生活型態風險偏低，建議維持良好習慣並定期追蹤。`}</p>
+    </div>
+    ${scores.map(s=>{
+      const tl=tierLabel(s.tier);
+      const rec=s.rec;
+      const msg=s.tier==="low"?rec.low:s.tier==="mid"?rec.mid:rec.high;
+      const iconBg=CAT_ICON_CSS[s.key]||"#0F5C57";
+      const icon=CAT_ICONS[s.key]||"●";
+      const tests=s.tier==="high"?splitTests(s.test):[];
+      const activeTips=s.tier==="high"?(rec.tips||[]):s.tier==="mid"?(rec.midTips||[]):[];
+      return `<div class="result-card tier-${s.tier}">
+        <div class="rc-head" style="background:${tl.headBg};">
+          <div class="rc-head-left">
+            <div class="rc-icon" style="background:${iconBg};">${icon}</div>
+            <div>
+              <div class="rc-name" style="color:${tl.headColor};">${s.name}</div>
+              <div class="rc-score" style="color:${tl.headColor};opacity:.75;">勾選 ${s.score} / ${s.items.length} 題</div>
+            </div>
+          </div>
+          <span class="tier-badge" style="background:${tl.badgeBg};color:${tl.badgeColor};">${tl.text}</span>
+        </div>
+        <div class="rc-body">
+          <p class="rc-desc">${msg}</p>
+          ${tests.length?`<div class="rc-section-label">建議檢測項目</div>
+          <div class="test-pills">${tests.map(t=>`<span class="test-pill">${t}</span>`).join('')}</div>`:''}
+          ${activeTips.length?`
+          <div class="rc-section-label" style="border-top:1px solid var(--line);padding-top:16px;margin-top:4px;">${s.tier==='high'?'生活調整建議':'生活提醒'}</div>
+          <div class="tip-cards">${activeTips.map(tip=>{
+            const {title,desc}=splitTip(tip);
+            const ic=getTipIcon(title);
+            return `<div class="tip-card">
+              <span class="tip-icon" style="color:var(--${s.color})">${ic}</span>
+              <div><div class="tip-title">${title}</div>${desc?`<div class="tip-desc">${desc}</div>`:''}</div>
+            </div>`;
+          }).join('')}</div>${s.tier==='mid'?`<div style="margin-top:10px;padding:11px 14px;background:#FFF8E1;border-radius:8px;border:1px solid #FFD54F;font-size:13px;color:#6D4C00;line-height:1.7;">💡 <strong>小提醒：</strong>若依照以上建議調整半年後仍未見改善，或症狀持續增加、變嚴重，建議預約專業營養服務，早日找出問題根源並擬定改善方向。</div>`:''}`:''}
+        </div>
+      </div>`;
+    }).join('')}
+    ${state.note?`<div style="background:var(--card);border:1px solid var(--line);border-radius:4px;padding:20px 22px;margin-bottom:14px;">
+      <div class="eyebrow">您的補充說明</div>
+      <p style="font-size:14.5px;margin-top:8px;line-height:1.7;">${esc(state.note)}</p>
+    </div>`:''}
+    <div class="contact-card" style="text-align:center;padding:28px;">
+      <div class="eyebrow" style="color:var(--teal);justify-content:center;">下一步</div>
+      <h2 style="font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:var(--ink);margin:10px 0 6px;line-height:1.35;">填完問卷不代表結束，是開始</h2>
+      <p style="font-size:15px;color:var(--teal);margin:0 0 22px;line-height:1.6;">加入官方 LINE，讓營養師接手您的煩惱</p>
+      <div class="contact-actions" style="justify-content:center;">
+        <a class="line-btn" href="https://lin.ee/nckt8Qs" target="_blank" rel="noopener" style="border-radius:8px;padding:14px 32px;font-size:15px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.02 2 11c0 3.04 1.65 5.72 4.15 7.4-.18.64-.66 2.35-.76 2.72-.12.45.17.44.36.32.15-.1 2.36-1.56 3.32-2.19.6.08 1.22.13 1.85.13 5.52 0 10-4.02 10-9s-4.48-9-10-9z"/></svg>
+          加入官方 LINE
+        </a>
+      </div>
+    </div>
+    <footer class="note">本結果為初步生活型態風險篩檢，僅供參考。實際是否需要檢測請與醫師或專業醫事人員進一步討論。</footer>
+    </div>
+    <div style="margin-top:28px;"><button class="secondary" id="restartBtn">重新填寫</button></div>
+  `;
+}
+
+function renderAdminGate(){
+  return `<div class="admin-gate">
+    <div class="eyebrow">後台管理</div>
+    <h2>請輸入管理密碼</h2>
+    <div class="field"><label>密碼</label><input type="password" id="pwInput" placeholder="••••••••"></div>
+    <div id="pwError" style="color:#B0492E;font-size:13px;margin-top:8px;display:none;">密碼錯誤，請再試一次</div>
+    <button class="primary" id="pwSubmit">登入</button>
+    <button class="secondary" id="pwCancel" style="margin-left:8px;">返回問卷</button>
+  </div>`;
+}
+
+function renderAdmin(){
+  return `
+    <div class="eyebrow">後台管理</div>
+    <h1>學員填答紀錄</h1>
+    <div class="toolbar">
+      <p class="lead" style="margin-top:0;">查看所有學員的填答內容、分數與建議結果。</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="secondary" style="margin-top:0;" id="exportBtn">匯出 CSV</button>
+        <button class="secondary" style="margin-top:0;" id="logoutBtn">登出</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:flex-end;">
+      <div style="flex:1;min-width:160px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;">搜尋姓名</div>
+        <input type="text" id="adminSearch" placeholder="輸入姓名關鍵字…" style="width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:3px;font-family:'Inter',sans-serif;font-size:14px;">
+      </div>
+      <div style="min-width:130px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;">開始日期</div>
+        <input type="date" id="adminDateFrom" style="padding:9px 12px;border:1px solid var(--line);border-radius:3px;font-family:'Inter',sans-serif;font-size:14px;width:100%;">
+      </div>
+      <div style="min-width:130px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;">結束日期</div>
+        <input type="date" id="adminDateTo" style="padding:9px 12px;border:1px solid var(--line);border-radius:3px;font-family:'Inter',sans-serif;font-size:14px;width:100%;">
+      </div>
+      <button class="secondary" style="margin-top:0;" id="adminFilterBtn">篩選</button>
+      <button class="secondary" style="margin-top:0;" id="adminResetBtn">清除</button>
+    </div>
+    <div id="adminStats" style="margin-top:16px;"></div>
+    <div id="adminContent"><div class="empty-state">載入中...</div></div>
+  `;
+}
+
+function renderAdminStats(rows){
+  const total=rows.length;
+  const catKeys=['hormone_male','hormone_female','gut','stress','thyroid','chronic','diet'];
+  const catMap={hormone_male:'賀爾蒙(男)',hormone_female:'賀爾蒙(女)',gut:'消化道',stress:'壓力/睡眠',thyroid:'甲狀腺',chronic:'慢性疾病',diet:'飲食攝取'};
+  const highCounts={};
+  catKeys.forEach(k=>{highCounts[k]=0;});
+  rows.forEach(r=>{(r.scores||[]).forEach(s=>{if(s.tier==='high') highCounts[s.key]=(highCounts[s.key]||0)+1;});});
+  const statCards=[
+    {label:'總填答人數',val:total,icon:'👥'},
+    {label:'方便聯繫時間已填',val:rows.filter(r=>r.contactTime).length,icon:'🕐'},
+    {label:'同意被聯繫',val:rows.filter(r=>r.consent).length,icon:'💬'},
+  ];
+  let statsHtml=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:16px;">
+    ${statCards.map(s=>`<div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px;">
+      <div style="font-size:22px;">${s.icon}</div>
+      <div style="font-family:'Fraunces',serif;font-size:26px;font-weight:600;color:var(--teal);margin-top:4px;">${s.val}</div>
+      <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">${s.label}</div>
+    </div>`).join('')}
+    ${catKeys.map(k=>`<div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px;">
+      <div style="font-size:11px;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;">${catMap[k]}</div>
+      <div style="font-family:'Fraunces',serif;font-size:26px;font-weight:600;color:var(--high);margin-top:4px;">${highCounts[k]||0}</div>
+      <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">建議檢測人數</div>
+    </div>`).join('')}
+  </div>`;
+  return statsHtml;
+}
+
+function renderAdminTable(rows){
+  if(rows.length===0) return '<div class="empty-state">查無符合條件的紀錄。</div>';
+  return `<table class="admin-table">
+    <thead><tr><th>姓名</th><th>性別</th><th>LINE ID</th><th>信箱</th><th>方便聯繫時間</th><th>同意被聯繫</th><th>填答時間</th><th>分數明細</th><th>建議檢測</th><th>補充說明</th><th></th></tr></thead>
+    <tbody>${rows.map(r=>`<tr>
+      <td>${esc(r.name)||'(未填)'}</td>
+      <td>${r.gender==='male'?'男':'女'}</td>
+      <td>${esc(r.lineId)||'—'}</td>
+      <td>${esc(r.email)||'—'}</td>
+      <td>${esc(r.contactTime)||'—'}</td>
+        <td style="text-align:center;">${r.consent?'✅':'—'}</td>
+      <td>${new Date(r.submittedAt).toLocaleString('zh-TW')}</td>
+      <td>${(r.scores||[]).map(s=>`<span class="pill" style="background:var(--${s.color}-dim);color:var(--${s.color})">${s.name} ${s.score}</span>`).join('')}</td>
+      <td>${(r.scores||[]).filter(s=>s.tier==='high').map(s=>`<span class="pill" style="background:var(--ink);color:#fff">${s.name}</span>`).join('')||'<span style="color:var(--ink-soft)">無</span>'}</td>
+      <td style="max-width:140px;font-size:12.5px;">${esc(r.note)||'—'}</td>
+      <td><button onclick="deleteRow('${esc(r.id)}')" style="padding:4px 10px;background:#B0492E;color:#fff;border:none;border-radius:4px;font-size:12px;cursor:pointer;font-family:Inter,sans-serif;">刪除</button></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+async function loadAdminData(){
+  const el=document.getElementById('adminContent');
+  const statsEl=document.getElementById('adminStats');
+  el.innerHTML='<div class="empty-state">載入中，請稍候…</div>';
+  try{
+    const res=await fetch(APPS_SCRIPT_URL);
+    const json=await res.json();
+    if(json.status!=='success') throw new Error(json.message);
+    const rows=(json.rows||[]).sort((a,b)=>new Date(b.submittedAt)-new Date(a.submittedAt));
+    window.__adminRows=rows;
+    if(statsEl) statsEl.innerHTML=renderAdminStats(rows);
+    if(rows.length===0){
+      el.innerHTML='<div class="empty-state">目前還沒有任何學員填答紀錄。</div>';
+    } else {
+      el.innerHTML=renderAdminTable(rows);
+    }
+  }catch(e){
+    console.error(e);
+    el.innerHTML='<div class="empty-state">讀取資料時發生錯誤，請稍後再試。</div>';
+  }
+}
+
+async function deleteRow(id){
+  if(!confirm('確定要刪除這筆紀錄嗎？')) return;
+  try{
+    await window.storage.delete(id, true);
+    window.__adminRows = window.__adminRows.filter(r=>r.id!==id);
+    const statsEl=document.getElementById('adminStats');
+    if(statsEl) statsEl.innerHTML=renderAdminStats(window.__adminRows);
+    document.getElementById('adminContent').innerHTML=renderAdminTable(window.__adminRows);
+  }catch(e){
+    alert('刪除失敗，請稍後再試。');
+  }
+}
+
+function applyAdminFilter(){
+  const search=(document.getElementById('adminSearch')?.value||'').trim().toLowerCase();
+  const from=document.getElementById('adminDateFrom')?.value;
+  const to=document.getElementById('adminDateTo')?.value;
+  let rows=window.__adminRows||[];
+  if(search) rows=rows.filter(r=>(r.name||'').toLowerCase().includes(search));
+  if(from) rows=rows.filter(r=>new Date(r.submittedAt)>=new Date(from));
+  if(to) rows=rows.filter(r=>new Date(r.submittedAt)<=new Date(to+'T23:59:59'));
+  const statsEl=document.getElementById('adminStats');
+  if(statsEl) statsEl.innerHTML=renderAdminStats(rows);
+  document.getElementById('adminContent').innerHTML=renderAdminTable(rows);
+}
+
+function downloadCSV(){
+  const rows=window.__adminRows||[];if(rows.length===0)return;
+  const catNames=['賀爾蒙','消化道','壓力/睡眠','甲狀腺','慢性疾病','飲食攝取'];
+  const header=['姓名','性別','LINE ID','電子信箱','方便聯繫時間','同意被聯繫','填答時間',...catNames.map(n=>n+'分數'),'建議檢測系統','補充說明'];
+  const lines=[header.join(',')];
+  rows.forEach(r=>{
+    const scoreMap={};(r.scores||[]).forEach(s=>{scoreMap[s.key]=s.score;});
+    const keys=['hormone_male','hormone_female','gut','stress','thyroid','chronic','diet'];
+    const vals=catNames.map((_,i)=>{
+      if(i===0) return scoreMap['hormone_male']??scoreMap['hormone_female']??0;
+      return scoreMap[keys[i+1]]??0;
+    });
+    const rec=(r.scores||[]).filter(s=>s.tier==='high').map(s=>s.name).join('；');
+    const line=[r.name||'',r.gender==='male'?'男':'女',r.lineId||'',r.email||'',r.contactTime||'',r.consent?'是':'否',new Date(r.submittedAt).toLocaleString('zh-TW'),...vals,rec,r.note||'']
+      .map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
+    lines.push(line);
+  });
+  const blob=new Blob(["\uFEFF"+lines.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='健康檢測問卷_填答紀錄.csv';a.click();URL.revokeObjectURL(url);
+}
+
+async function submitResult(scores){
+  const id='submission:'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+  const payload={id,name:state.name,lineId:state.lineId,email:state.email,gender:state.gender,note:state.note,contactTime:state.contactTime,consent:state.consent,submittedAt:new Date().toISOString(),
+    scores:scores.map(s=>({key:s.key,name:s.name,color:s.color,score:s.score,tier:s.tier}))};
+  try{
+    const url=APPS_SCRIPT_URL+'?action=save&data='+encodeURIComponent(JSON.stringify(payload));
+    await fetch(url);
+  }catch(e){
+    console.error('儲存失敗',e);
+  }
+}
+
+function attachHandlers(){
+  if(state.view==="intro"){
+    function updateStartBtn(){
+      const btn=document.getElementById('startBtn');
+      const hint=document.getElementById('startHint');
+      if(!btn) return;
+      const disabled=!state.gender||!state.name.trim()||!canProceed();
+      btn.disabled=disabled;
+      if(hint){
+        if(!state.gender) hint.textContent='請先選擇性別以繼續';
+        else if(!state.name.trim()) hint.textContent='請輸入姓名以繼續';
+        else if(!canProceed()){
+          if(state.email.trim()&&!isValidEmail(state.email)) hint.textContent='電子信箱格式不正確，請重新確認';
+          else hint.textContent='請填寫 LINE ID 或正確格式的電子信箱（擇一）';
+        } else hint.textContent='';
+      }
+    }
+    document.getElementById('nameInput').addEventListener('input',e=>{state.name=e.target.value;updateStartBtn();});
+    document.getElementById('lineInput').addEventListener('input',e=>{state.lineId=e.target.value;updateStartBtn();});
+    document.getElementById('emailInput').addEventListener('input',e=>{state.email=e.target.value;updateStartBtn();});
+    document.querySelectorAll('.gender-btn').forEach(b=>b.addEventListener('click',()=>{state.gender=b.dataset.gender;render();}));
+    const sb=document.getElementById('startBtn');
+    if(sb) sb.addEventListener('click',()=>{state.view="quiz";state.step=0;render();});
+  }
+  else if(state.view==="quiz"){
+    document.querySelectorAll('.q-item').forEach(el=>{
+      el.addEventListener('click',()=>{const k=el.dataset.cat+":"+el.dataset.idx;state.answers[k]=!state.answers[k];render();});
+    });
+    const pb=document.getElementById('prevBtn');
+    if(pb) pb.addEventListener('click',()=>{if(state.step>0){state.step--;render();}});
+    document.getElementById('nextBtn').addEventListener('click',()=>{
+      const cats=getCats(state.gender);
+      if(state.step<cats.length-1){state.step++;render();}
+      else{state.view="extra";render();}
+    });
+  }
+  else if(state.view==="extra"){
+    document.getElementById('noteInput').addEventListener('input',e=>{state.note=e.target.value;});
+    document.getElementById('contactTimeInput').addEventListener('input',e=>{state.contactTime=e.target.value;});
+    document.getElementById('consentRow').addEventListener('click',()=>{state.consent=!state.consent;render();});
+    document.getElementById('prevBtn').addEventListener('click',()=>{
+      const cats=getCats(state.gender);state.step=cats.length-1;state.view="quiz";render();
+    });
+    document.getElementById('submitBtn').addEventListener('click',async()=>{
+      const scores=computeScores();await submitResult(scores);state.view="result";render();
+    });
+  }
+  else if(state.view==="result"){
+    document.getElementById('restartBtn').addEventListener('click',()=>{
+      state={view:"intro",name:"",lineId:"",email:"",gender:"",note:"",contactTime:"",consent:false,saveFailed:false,step:0,answers:{},submissionId:null};render();
+    });
+  }
+  else if(state.view==="admin-gate"){
+    const tryLogin=()=>{
+      if(document.getElementById('pwInput').value===ADMIN_PASSWORD){state.view="admin";render();loadAdminData();}
+      else document.getElementById('pwError').style.display='block';
+    };
+    document.getElementById('pwSubmit').addEventListener('click',tryLogin);
+    document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
+    document.getElementById('pwCancel').addEventListener('click',()=>{state.view="intro";render();});
+  }
+  else if(state.view==="admin"){
+    document.getElementById('logoutBtn').addEventListener('click',()=>{state.view="intro";render();});
+    document.getElementById('exportBtn').addEventListener('click',downloadCSV);
+    document.getElementById('adminFilterBtn').addEventListener('click',applyAdminFilter);
+    document.getElementById('adminResetBtn').addEventListener('click',()=>{
+      document.getElementById('adminSearch').value='';
+      document.getElementById('adminDateFrom').value='';
+      document.getElementById('adminDateTo').value='';
+      const all=window.__adminRows||[];
+      const statsEl=document.getElementById('adminStats');
+      if(statsEl) statsEl.innerHTML=renderAdminStats(all);
+      document.getElementById('adminContent').innerHTML=renderAdminTable(all);
+    });
+    document.getElementById('adminSearch').addEventListener('keydown',e=>{if(e.key==='Enter') applyAdminFilter();});
+  }
+}
+
+document.getElementById('adminToggle').addEventListener('click',()=>{
+  state.view=(state.view==="admin"||state.view==="admin-gate")?"intro":"admin-gate";render();
+});
+render();
+</script>
+</body>
+</html>
